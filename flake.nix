@@ -8,6 +8,6 @@
   outputs =
     { nixpkgs, ... }:
     {
-      lib = { };
+      lib = import ./base64 { inherit (nixpkgs) lib; };
     };
 }
