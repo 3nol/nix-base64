@@ -9,6 +9,11 @@ This repository provides two Nix functions.
 - `lib.toBase64 :: String -> String`
 - `lib.fromBase64 :: String -> String`
 
+Additionally, a default overlay is available (see examples below).
+
+> [!NOTE]
+> The `toBase64` function only supports ASCII inputs.
+
 ## Examples
 
 If you want to use these functions interactively.
