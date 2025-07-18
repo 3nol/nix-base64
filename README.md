@@ -21,20 +21,16 @@ If you want to include this `lib` and/or update `<nixpkgs/lib>` in your flake.
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    base64.url = "github:3nol/nix-base64";
+    nix-base64.url = "github:3nol/nix-base64";
   };
 
-  outputs = { self, nixpkgs, base64, ... }:
+  outputs = { self, nixpkgs, nix-base64, ... }:
   let
     system = "x86_64-linux";
 
     pkgs = import nixpkgs {
       inherit system;
-      overlays = [
-        (
-          final: prev: { lib = prev.lib // base64.lib; }
-        )
-      ];
+      overlays = [ nix-base64.overlays.default ];
     };
   in
   {

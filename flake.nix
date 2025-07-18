@@ -7,7 +7,13 @@
 
   outputs =
     { nixpkgs, ... }:
+    let
+      base64 = import ./base64 { inherit (nixpkgs) lib; };
+    in
     {
-      lib = import ./base64 { inherit (nixpkgs) lib; };
+      lib = base64;
+      overlays.default = final: prev: {
+        lib = prev.lib // base64;
+      };
     };
 }
