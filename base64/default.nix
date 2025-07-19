@@ -50,49 +50,55 @@ in
   # toBase64 :: String -> String
   toBase64 =
     str:
-    let
-      bytes = map charToBytes (lib.stringToCharacters str);
-      numTriplets = (builtins.stringLength str) / 3;
-      tripletAt = ithSlice 3 bytes;
+    if builtins.stringLength str == 0 then
+      ""
+    else
+      let
+        bytes = map charToBytes (lib.stringToCharacters str);
+        numTriplets = (builtins.stringLength str) / 3;
+        tripletAt = ithSlice 3 bytes;
 
-      convertTriplet = slice: lib.concatMapStrings sextetToChar (intToSextets (bytesToInt slice));
-      convertLastTriplet =
-        slice:
-        let
-          len = builtins.length slice;
-          slice' = slice ++ lib.replicate (3 - len) 0;
-          encoded = lib.concatMapStrings sextetToChar (intToSextets (bytesToInt slice'));
-        in
-        lib.optionalString (len < 3) (
-          builtins.substring 0 (len + 1) encoded + lib.strings.replicate (3 - len) "="
-        );
+        convertTriplet = slice: lib.concatMapStrings sextetToChar (intToSextets (bytesToInt slice));
+        convertLastTriplet =
+          slice:
+          let
+            len = builtins.length slice;
+            slice' = slice ++ lib.replicate (3 - len) 0;
+            encoded = lib.concatMapStrings sextetToChar (intToSextets (bytesToInt slice'));
+          in
+          lib.optionalString (len < 3) (
+            builtins.substring 0 (len + 1) encoded + lib.strings.replicate (3 - len) "="
+          );
 
-      # Unpadded heads and potentially-padded tail.
-      heads = builtins.genList (i: convertTriplet (tripletAt i)) numTriplets;
-      tail = convertLastTriplet (tripletAt numTriplets);
-    in
-    lib.concatStrings (heads ++ [ tail ]);
+        # Unpadded heads and potentially-padded tail.
+        heads = builtins.genList (i: convertTriplet (tripletAt i)) numTriplets;
+        tail = convertLastTriplet (tripletAt numTriplets);
+      in
+      lib.concatStrings (heads ++ [ tail ]);
 
   # fromBase64 :: String -> String
   fromBase64 =
     str:
-    let
-      sextets = map charToSextet (lib.stringToCharacters str);
-      numQuartets = (builtins.stringLength str) / 4;
-      quartetAt = ithSlice 4 sextets;
+    if builtins.stringLength str == 0 then
+      ""
+    else
+      let
+        sextets = map charToSextet (lib.stringToCharacters str);
+        numQuartets = (builtins.stringLength str) / 4;
+        quartetAt = ithSlice 4 sextets;
 
-      convertQuartet = slice: lib.concatMapStrings bytesToChar (intToBytes (sextetsToInt slice));
-      convertLastQuartet =
-        slice:
-        let
-          pad = builtins.length (lib.filter (s: s == "=") (lib.stringToCharacters str));
-          decoded = intToBytes (sextetsToInt slice);
-        in
-        lib.concatMapStrings bytesToChar (lib.sublist 0 (3 - pad) decoded);
+        convertQuartet = slice: lib.concatMapStrings bytesToChar (intToBytes (sextetsToInt slice));
+        convertLastQuartet =
+          slice:
+          let
+            pad = builtins.length (lib.filter (s: s == "=") (lib.stringToCharacters str));
+            decoded = intToBytes (sextetsToInt slice);
+          in
+          lib.concatMapStrings bytesToChar (lib.sublist 0 (3 - pad) decoded);
 
-      # Unpadded heads and potentially-padded tail.
-      heads = builtins.genList (i: convertQuartet (quartetAt i)) (numQuartets - 1);
-      tail = convertLastQuartet (quartetAt (numQuartets - 1));
-    in
-    lib.concatStrings (heads ++ [ tail ]);
+        # Unpadded heads and potentially-padded tail.
+        heads = builtins.genList (i: convertQuartet (quartetAt i)) (numQuartets - 1);
+        tail = convertLastQuartet (quartetAt (numQuartets - 1));
+      in
+      lib.concatStrings (heads ++ [ tail ]);
 }
