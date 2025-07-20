@@ -66,7 +66,7 @@ in
             slice' = slice ++ lib.replicate (3 - len) 0;
             encoded = lib.concatMapStrings sextetToChar (intToSextets (bytesToInt slice'));
           in
-          lib.optionalString (len < 3) (
+          lib.optionalString (0 < len && len < 3) (
             builtins.substring 0 (len + 1) encoded + lib.strings.replicate (3 - len) "="
           );
 
